@@ -18,7 +18,6 @@ app = FastAPI(
 
 # Request model for creating tasks
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class TaskCreate(BaseModel):
@@ -181,16 +180,6 @@ def update_task(
             status_code=500,
             detail="Database error occurred while updating task"
         )
-    for key, value in changes.items():
-        setattr(task, key, value)
-
-    db.commit()
-    db.refresh(task)
-
-    return task
-
-
-# Delete a task
 
 # Delete a task
 @app.delete("/tasks/{task_id}")
