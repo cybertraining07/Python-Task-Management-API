@@ -209,3 +209,66 @@ def test_update_task_with_empty_body():
 
     assert response.status_code == 400
     assert response.json()["detail"] == "No update fields provided"
+
+def test_update_task_with_empty_title():
+    create_response = client.post(
+        "/tasks",
+        json={"title": "Original title"}
+    )
+
+    task_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/tasks/{task_id}",
+        json={"title": ""}
+    )
+
+    assert response.status_code == 422
+
+
+def test_update_task_with_whitespace_title():
+    create_response = client.post(
+        "/tasks",
+        json={"title": "Original title"}
+    )
+
+    task_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/tasks/{task_id}",
+        json={"title": "   "}
+    )
+
+    assert response.status_code == 422
+
+
+def test_update_task_with_long_description():
+    create_response = client.post(
+        "/tasks",
+        json={"title": "Original title"}
+    )
+
+    task_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/tasks/{task_id}",
+        json={"description": "A" * 501}
+    )
+
+    assert response.status_code == 422
+
+
+def test_update_task_with_null_title():
+    create_response = client.post(
+        "/tasks",
+        json={"title": "Original title"}
+    )
+
+    task_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/tasks/{task_id}",
+        json={"title": None}
+    )
+
+    assert response.status_code == 422

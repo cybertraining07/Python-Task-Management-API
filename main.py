@@ -37,10 +37,24 @@ class TaskCreate(BaseModel):
 
 
 # Request model for updating tasks
+
 class TaskUpdate(BaseModel):
-    title: str | None = None
-    description: str | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
     completed: bool | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value):
+        if value is None:
+            return value
+
+        value = value.strip()
+
+        if not value:
+            raise ValueError("Task title cannot be empty or contain only spaces")
+
+        return value
 
 
 # Response model
