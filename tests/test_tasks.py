@@ -134,3 +134,41 @@ def test_task_not_found():
     response = client.get("/tasks/999999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Task not found"
+
+def test_create_task_with_empty_title():
+    response = client.post(
+        "/tasks",
+        json={
+            "title": "",
+            "description": "Invalid task",
+            "completed": False
+        }
+    )
+
+    assert response.status_code == 422
+
+
+def test_create_task_with_whitespace_title():
+    response = client.post(
+        "/tasks",
+        json={
+            "title": "   ",
+            "description": "Invalid task",
+            "completed": False
+        }
+    )
+
+    assert response.status_code == 422
+
+
+def test_create_task_with_long_description():
+    response = client.post(
+        "/tasks",
+        json={
+            "title": "Valid task",
+            "description": "A" * 501,
+            "completed": False
+        }
+    )
+
+    assert response.status_code == 422

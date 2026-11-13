@@ -16,10 +16,24 @@ app = FastAPI(
 
 
 # Request model for creating tasks
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
 class TaskCreate(BaseModel):
-    title: str
-    description: str = ""
+    title: str = Field(min_length=1, max_length=100)
+    description: str = Field(default="", max_length=500)
     completed: bool = False
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value):
+        value = value.strip()
+
+        if not value:
+            raise ValueError("Task title cannot be empty or contain only spaces")
+
+        return value
 
 
 # Request model for updating tasks
