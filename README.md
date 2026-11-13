@@ -119,7 +119,7 @@ Run the test suite:
 pytest -v
 ```
 
-**Latest test result: 18 tests passed.**
+**Latest test result: 19 tests passed.**
 
 The test suite covers:
 

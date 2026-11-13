@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from sqlalchemy.exc import SQLAlchemyError
 
 from main import app
 from database import Base, get_db
@@ -272,3 +273,25 @@ def test_update_task_with_null_title():
     )
 
     assert response.status_code == 422
+def test_health_check_database_unavailable(monkeypatch):
+
+    class BrokenDatabase:
+        def execute(self, statement):
+            raise SQLAlchemyError("Simulated database failure")
+
+        def rollback(self):
+            pass
+
+    def override_broken_db():
+        yield BrokenDatabase()
+
+    monkeypatch.setitem(
+        app.dependency_overrides,
+        get_db,
+        override_broken_db
+    )
+
+    response = client.get("/health")
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Database unavailable"
