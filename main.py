@@ -1,0 +1,159 @@
+from fastapi import FastAPI, HTTPException, Depends
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy.orm import Session
+
+import models
+from database import engine, get_db
+
+# Create database tables
+models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="Python Task Management API",
+    description="A beginner-friendly REST API with SQLite",
+    version="2.0.0"
+)
+
+
+# Request model for creating tasks
+class TaskCreate(BaseModel):
+    title: str
+    description: str = ""
+    completed: bool = False
+
+
+# Request model for updating tasks
+class TaskUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    completed: bool | None = None
+
+
+# Response model
+class TaskResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    completed: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@app.get("/")
+def home():
+    return {
+        "message": "Welcome to the Task Management API",
+        "status": "running"
+    }
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+
+# Create a task
+@app.post("/tasks", status_code=201, response_model=TaskResponse)
+def create_task(task: TaskCreate, db: Session = Depends(get_db)):
+    new_task = models.Task(
+        title=task.title,
+        description=task.description,
+        completed=task.completed
+    )
+
+    db.add(new_task)
+    db.commit()
+    db.refresh(new_task)
+
+    return new_task
+
+
+# Get all tasks
+@app.get("/tasks", response_model=list[TaskResponse])
+def get_tasks(db: Session = Depends(get_db)):
+    return db.query(models.Task).all()
+
+
+# Get one task
+@app.get("/tasks/{task_id}", response_model=TaskResponse)
+def get_task(task_id: int, db: Session = Depends(get_db)):
+    task = db.query(models.Task).filter(
+        models.Task.id == task_id
+    ).first()
+
+    if task is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+
+    return task
+
+
+# Update a task
+@app.patch("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(
+    task_id: int,
+    updated_task: TaskUpdate,
+    db: Session = Depends(get_db)
+):
+    task = db.query(models.Task).filter(
+        models.Task.id == task_id
+    ).first()
+
+    if task is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+
+    changes = updated_task.model_dump(exclude_unset=True)
+
+    if not changes:
+        raise HTTPException(
+            status_code=400,
+            detail="No update fields provided"
+        )
+
+    if any(value is None for value in changes.values()):
+        raise HTTPException(
+            status_code=422,
+            detail="Task fields cannot be null"
+        )
+
+    for key, value in changes.items():
+        setattr(task, key, value)
+
+    db.commit()
+    db.refresh(task)
+
+    return task
+
+
+# Delete a task
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    task = db.query(models.Task).filter(
+        models.Task.id == task_id
+    ).first()
+
+    if task is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+
+    deleted_task = {
+        "id": task.id,
+        "title": task.title,
+        "description": task.description,
+        "completed": task.completed
+    }
+
+    db.delete(task)
+    db.commit()
+
+    return {
+        "message": "Task deleted successfully",
+        "task": deleted_task
+    }
