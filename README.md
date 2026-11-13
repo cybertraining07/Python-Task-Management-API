@@ -1,23 +1,27 @@
-
 # Python Task Management API
 
 ## Project Overview
 
-A beginner-friendly REST API built with Python and FastAPI. It allows users to create, retrieve, update, and delete tasks using HTTP requests.
+A beginner-friendly REST API developed with Python and FastAPI. The application allows users to create, retrieve, update, and delete tasks through HTTP requests.
 
-The application uses SQLite for persistent data storage and SQLAlchemy for database operations.
+It uses SQLite for persistent data storage and SQLAlchemy for database operations.
+
+This project demonstrates foundational software engineering skills, including REST API development, database integration, input validation, error handling, and automated testing.
 
 ## Features
 
 - Create new tasks
 - Retrieve all tasks
 - Retrieve a task by ID
-- Update existing tasks
+- Update existing tasks using PATCH
 - Delete tasks
 - Health-check endpoint
 - SQLite database integration
-- Automated tests using Pytest
-- Isolated test database
+- SQLAlchemy ORM for database operations
+- Input validation using Pydantic
+- HTTP error handling (400, 404, and 422)
+- Automated testing with Pytest
+- Isolated test database for reliable testing
 
 ## Technologies
 
@@ -26,9 +30,10 @@ The application uses SQLite for persistent data storage and SQLAlchemy for datab
 - SQLAlchemy
 - SQLite
 - Uvicorn
+- Pydantic
 - Pytest
 - HTTPX
-- Git
+- Git and GitHub
 
 ## Project Structure
 
@@ -37,33 +42,30 @@ Python-Task-Management-API/
 ├── main.py
 ├── database.py
 ├── models.py
-├── tasks.db
 ├── requirements.txt
 ├── pytest.ini
 ├── .gitignore
+├── README.md
 └── tests/
     ├── conftest.py
     └── test_tasks.py
 ```
+
+The SQLite database file is created locally when the application runs and is excluded from GitHub using `.gitignore`.
 
 ## Installation
 
 Clone the repository:
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/cybertraining07/Python-Task-Management-API.git
 cd Python-Task-Management-API
 ```
 
-Create a virtual environment:
+Create and activate a virtual environment:
 
 ```bash
-python -m venv venv
-```
-
-Activate it:
-
-```bash
+python3 -m venv venv
 source venv/bin/activate
 ```
 
@@ -75,8 +77,10 @@ pip install -r requirements.txt
 
 ## Run the Application
 
+Start the development server:
+
 ```bash
-uvicorn main:app --reload --host 127.0.0.1 --port 8001
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8001
 ```
 
 Open the interactive API documentation:
@@ -87,37 +91,65 @@ http://127.0.0.1:8001/docs
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | / | Welcome message |
-| GET | /health | Health check |
-| POST | /tasks | Create a task |
-| GET | /tasks | Retrieve all tasks |
-| GET | /tasks/{task_id} | Retrieve one task |
-| PATCH | /tasks/{task_id} | Update a task |
-| DELETE | /tasks/{task_id} | Delete a task |
+| GET | `/` | Welcome message |
+| GET | `/health` | Health check |
+| POST | `/tasks` | Create a task |
+| GET | `/tasks` | Retrieve all tasks |
+| GET | `/tasks/{task_id}` | Retrieve a task by ID |
+| PATCH | `/tasks/{task_id}` | Update a task |
+| DELETE | `/tasks/{task_id}` | Delete a task |
 
-## Run Automated Tests
+## Example Task
+
+Create a task using the POST `/tasks` endpoint:
+
+```json
+{
+  "title": "Learn FastAPI",
+  "description": "Build my first REST API",
+  "completed": false
+}
+```
+
+## Automated Testing
+
+Run the test suite:
 
 ```bash
 pytest -v
 ```
 
-The current test suite contains eight automated tests covering the main API functionality.
+**Latest test result: 18 tests passed.**
+
+The test suite covers:
+
+- API health checks
+- Task creation and retrieval
+- Task updates and deletion
+- Missing task handling
+- Empty and invalid task titles
+- Description length validation
+- Empty update requests
+- Null title validation
+
+Tests use a separate temporary SQLite database to avoid modifying the application's local database.
 
 ## Learning Outcomes
 
-- Building REST APIs with FastAPI
-- Working with HTTP methods and status codes
-- Using SQLAlchemy ORM
-- Integrating SQLite databases
-- Implementing CRUD functionality
-- Writing automated tests
-- Managing Python dependencies
-- Organizing a Python project
+Through this project, I practiced:
 
-## Project Status
+- Building REST APIs with Python and FastAPI
+- Implementing CRUD operations
+- Working with relational databases using SQLAlchemy
+- Validating API input with Pydantic
+- Handling HTTP errors
+- Writing automated tests with Pytest
+- Using Git and GitHub for version control
 
-Core API functionality and eight automated tests have been implemented and verified.
+## Project Repository
 
-## Disclaimer
+GitHub: https://github.com/cybertraining07/Python-Task-Management-API
 
-This project is an educational portfolio project and is not intended as a production-ready service.
+## Project Scope
+
+This is an educational portfolio project developed to demonstrate foundational Python backend development skills. It is not intended to be a production-ready application.
