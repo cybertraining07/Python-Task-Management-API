@@ -172,3 +172,40 @@ def test_create_task_with_long_description():
     )
 
     assert response.status_code == 422
+
+def test_update_nonexistent_task():
+    response = client.patch(
+        "/tasks/999999",
+        json={"completed": True}
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task not found"
+
+
+def test_delete_nonexistent_task():
+    response = client.delete("/tasks/999999")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task not found"
+
+
+def test_update_task_with_empty_body():
+    create_response = client.post(
+        "/tasks",
+        json={
+            "title": "Error Handling Test",
+            "description": "Testing empty updates",
+            "completed": False
+        }
+    )
+
+    task_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/tasks/{task_id}",
+        json={}
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "No update fields provided"
